@@ -278,7 +278,6 @@ public:
 	void fetchAccelSample();
 	void fetchAccelSampleDMA(uint8_t *buff, uint16_t size);
 	void convertSamplesToG(float *samples);
-	void convertSamplesToG2(float *samples);
 	void convertSamplesToG(int16_t *rawData, float *samples);
 	void accelLowNoiseMode();
 	void gyroLowNoiseMode();
