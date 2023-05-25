@@ -134,13 +134,6 @@ void IIm42652::fetchAccelSampleDMA(uint8_t *buff, uint16_t size)
 	readDMA(IIM42652::ACCEL_DATA_X1, buff, size);
 }
 
-void IIm42652::convertSamplesToG2(float *samples)
-{
-	samples[0] = rawAccelData_2[0] / (float)accelSensitivity_;
-	samples[1] = rawAccelData_2[1] / (float)accelSensitivity_;
-	samples[2] = rawAccelData_2[2] / (float)accelSensitivity_;
-}
-
 void IIm42652::convertSamplesToG(float *samples)
 {
 	samples[0] = rawAccelData_[0] / (float)accelSensitivity_;
