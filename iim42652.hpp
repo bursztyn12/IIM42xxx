@@ -10,6 +10,9 @@
 
 #include "stdint.h"
 
+//#define IIM42652_SPI
+#define IIM42652_I2C
+
 namespace IIM42652
 {
 	enum RegMap
@@ -19,6 +22,7 @@ namespace IIM42652
 		DEVICE_CONFIG = 0x11,
 		INT_CONFIG = 0x14,
 		FIFO_CONFIG = 0x16,
+		DRIVE_CONFIG = 0x19,
 		ACCEL_DATA_X1 = 0x1E,
 		ACCEL_DATA_X0,
 		ACCEL_DATA_Y1,
@@ -26,21 +30,26 @@ namespace IIM42652
 		ACCEL_DATA_Z1,
 		ACCEL_DATA_Z0,
 		INT_STATUS = 0x2D,
-		FIFO_DATA = 0x30,
-		INTF_CONFIG1 = 0x4D,
+		FIFO_COUNTH,
+		FIFO_COUNTL,
+		FIFO_DATA,
+		INTF_CONFIG0 = 0x4C,
+		INTF_CONFIG1,
 		PWR_MGMT0,
-		GYRO_CONFIG0 = 0x50,
+		GYRO_CONFIG0 = 0x4F,
 		ACCEL_CONFIG0,
 		GYRO_CONFIG1,
 		GYRO_ACCEL_CONFIG0,
 		ACCEL_CONFIG1,
-		INT_CONFIG0 = 0x63,
-		INT_SOURCE0 = 0x65,
-		WHO_AM_I = 0x75,
-		REG_BANK_SEL,
-		FIFO_CONFIG1 = 0x95,
+		FIFO_CONFIG1 = 0x5F,
 		FIFO_CONFIG2,
 		FIFO_CONFIG3,
+		INT_CONFIG0 = 0x63,
+		INT_SOURCE0 = 0x65,
+		FIFO_LOST_PKT0 = 0x6C,
+		FIFO_LOST_PKT1,
+		WHO_AM_I = 0x75,
+		REG_BANK_SEL,
 
 		//BANK 1
 		INTF_CONFIG5 = 0x7B,
@@ -121,8 +130,8 @@ namespace IIM42652
 
 	enum IntSource0
 	{
-		FIFO_FULL_INT1_EN = 0x01,
-		FIFO_THS_INT1_EN = 0x02,
+		FIFO_FULL_INT1_EN = 0x02,
+		FIFO_THS_INT1_EN = 0x04,
 		DRDY_INT1_EN = 0x08,
 		RESET_DONE_INT1_EN = 0x10,
 		PLL_RDY_INT1_EN = 0x20,
@@ -169,8 +178,9 @@ namespace IIM42652
         ODR_32_kHz = 0x01,
         ODR_16_kHZ,
         ODR_2_kHZ = 0x05,
-		ODR_1_kHZ = 0x06,
-		ODR_200_HZ = 0x07,
+		ODR_1_kHZ,
+		ODR_200_HZ,
+		ODR_100_HZ,
 		ODR_CLEAR_MSK = 0xE0
     };
 
@@ -222,7 +232,9 @@ namespace IIM42652
 
 	enum FifoConfig1
 	{
+		FIFO_DISABLE_OPTION = 0x00,
 		FIFO_ACCEL_EN = 0x01,
+		FIFO_GYRO_EN = 0x02,
 		FIFO_TEMP_EN = 0x04,
 		FIFO_WM_GT_EN = 0x20,
 		FIFO_RESUME_PARTIAL_RD = 0x40
@@ -261,16 +273,25 @@ public:
     void configDRDY(IIM42652::DrdyIntConfig0 clrOption);
     void configInt1(IIM42652::IntConfig &config);
     void configFIFO(IIM42652::FifoConfig1 accelEn, IIM42652::FifoConfig1 gyroEn,
-    				IIM42652::FifoIntConfig0 clrOption);
+    				IIM42652::FifoConfig1 tempEn, IIM42652::FifoIntConfig0 clrOption);
 	void reset();
 	void fetchAccelSample();
+	void fetchAccelSampleDMA(uint8_t *buff, uint16_t size);
 	void convertSamplesToG(float *samples);
+	void convertSamplesToG2(float *samples);
+	void convertSamplesToG(int16_t *rawData, float *samples);
 	void accelLowNoiseMode();
 	void gyroLowNoiseMode();
+	void fetchFIFOSamples(uint16_t size);
+	uint16_t getFIFOCount();
+	uint16_t getFIFOLostCount();
 private:
 	bool checkWhoAmI();
     void setBank(uint8_t bank);
-	void configAccel(IIM42652::ODR odr, IIM42652::AccelFS fs,
+#ifdef IIM42652_I2C
+    void changeSlewRate();
+#endif
+    void configAccel(IIM42652::ODR odr, IIM42652::AccelFS fs,
 					IIM42652::SampleBW bw);
 	void configGyro(IIM42652::ODR odr, IIM42652::GyroFS fs,
 				IIM42652::SampleBW bw);
@@ -278,8 +299,10 @@ private:
 	void accelTurnOff();
 	uint8_t getAccelMode();
 
-	inline void read(uint8_t reg, uint8_t *data, uint16_t size);
-    inline void write(uint8_t *data, uint16_t size);
+	inline bool read(uint8_t reg, uint8_t *data, uint16_t size);
+    inline bool write(uint8_t *data, uint16_t size);
+    inline void readDMA(uint8_t reg, uint8_t *data, uint16_t size);
+    inline void writeDMA(uint8_t *data, uint16_t size);
 
     inline void setMask(uint8_t *val, uint8_t mask)
 	{
@@ -299,6 +322,11 @@ private:
 	const uint8_t whoAmI_ = 0x6F;
 	IIM42652::AccelSensitivity accelSensitivity_;
 	int16_t rawAccelData_[3];
+	uint16_t rawAccelData_2[3];
+
+	#ifdef IIM42652_I2C
+	const uint8_t address_ = 0x68 << 1;
+	#endif
 };
 
 
