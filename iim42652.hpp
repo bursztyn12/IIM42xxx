@@ -322,7 +322,6 @@ private:
 	const uint8_t whoAmI_ = 0x6F;
 	IIM42652::AccelSensitivity accelSensitivity_;
 	int16_t rawAccelData_[3];
-	uint16_t rawAccelData_2[3];
 
 	#ifdef IIM42652_I2C
 	const uint8_t address_ = 0x68 << 1;
