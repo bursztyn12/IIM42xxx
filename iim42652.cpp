@@ -58,14 +58,6 @@ bool IIm42652::config()
 				IIM42652::ODR_DIV_2);
 	enableCLKINMode();
 
-	uint8_t val = 0;
-	read(IIM42652::INTF_CONFIG0, &val, 1);
-
-	if(val)
-	{
-		return true;
-	}
-
 	return true;
 }
 
