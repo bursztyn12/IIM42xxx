@@ -111,13 +111,9 @@ void IIm42652::fetchAccelSample()
 	read(IIM42652::ACCEL_DATA_X0, &data2[1], 1);
 
 
-	rawAccelData_[0] = ((data[1] << 8 | data[0]));
-	rawAccelData_[1] = ((data[3] << 8 | data[2]));
-	rawAccelData_[2] = ((data[5] << 8 | data[4]));
-
-	rawAccelData_2[0] = ((data[0] << 8 | data[1]));
-	rawAccelData_2[1] = ((data[2] << 8 | data[3]));
-	rawAccelData_2[2] = ((data[4] << 8 | data[5]));
+	rawAccelData_[0] = ((data[0] << 8 | data[1]));
+	rawAccelData_[1] = ((data[2] << 8 | data[3]));
+	rawAccelData_[2] = ((data[4] << 8 | data[5]));
 }
 
 void IIm42652::fetchAccelSampleDMA(uint8_t *buff, uint16_t size)
