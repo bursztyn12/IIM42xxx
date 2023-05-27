@@ -284,9 +284,9 @@ void IIm42652::fetchFIFOSamples(uint16_t size)
 
 	for(int i = 0; i < size / 8; i++)
 	{
-		rawData[0] = packets[0].xHigh << 8 | packets[0].xLow;
-		rawData[1] = packets[0].yHigh << 8 | packets[0].yLow;
-		rawData[2] = packets[0].zHigh << 8 | packets[0].zLow;
+		rawData[0] = packets[i].xHigh << 8 | packets[i].xLow;
+		rawData[1] = packets[i].yHigh << 8 | packets[i].yLow;
+		rawData[2] = packets[i].zHigh << 8 | packets[i].zLow;
 
 		//convertSamplesToG(rawData, accelVals);
 	}
